@@ -3,15 +3,17 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# Create non-root user first
+RUN addgroup -g 1001 -S nodejs && adduser -S worker -u 1001
+
 # Install dependencies
 COPY package.json ./
 RUN npm install --only=production
 
-# Copy source
-COPY src ./src
+# Copy source and set ownership
+COPY --chown=worker:nodejs src ./src
 
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs && adduser -S worker -u 1001
+# Switch to non-root user
 USER worker
 
 # Environment
